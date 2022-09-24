@@ -1,7 +1,7 @@
 # easy-calc  
 Web platform for publishing custom calculators.  
-To install project:  
-# ONLY FOR LINUX, need to have pipenv installed  
+# ONLY FOR LINUX, must have pipenv installed  
+To install project: 
 In terminal:  
 $ git clone https://github.com/probablyskela/easy-calc.git  
 $ cd easy-calc  
