@@ -23,7 +23,7 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Calculator'
-    put: # create calculator
+    post: # create calculator
       tags:
         - calculators
       summary: Create a new calculator
@@ -68,7 +68,7 @@ paths:
           description: Invalid ID supplied
         '404':
           description: User not found
-    post: # update calculator
+    put: # update calculator
       tags:
         - calculators
       summary: Update an existing calculator
@@ -99,7 +99,7 @@ paths:
         '404':
           description: User not found
   /user:
-    put: # create user
+    post: # create user
       tags:
         - user
       summary: Create a new user
@@ -142,7 +142,7 @@ paths:
           description: Invalid ID supplied
         '404':
           description: User not found
-    post: # update user
+    put: # update user
       tags:
         - user
       summary: Update user
