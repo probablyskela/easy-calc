@@ -32,7 +32,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Calculator'
+              $ref: '#/components/schemas/CalculatorCreationQuery'
         required: true
       responses:
         '201':
@@ -109,7 +109,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/User'
+              $ref: '#/components/schemas/UserCreationQuery'
       responses:
         '201':
           description: OK
@@ -203,4 +203,28 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Calculator'
-          
+    CalculatorCreationQuery:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Area of rectangle
+        code:
+          type: string
+          example: https://pastebin.com/jNH8BiAb
+        authorId:
+          type: integer
+          format: int32
+          example: 123456789
+    UserCreationQuery:
+      type: object
+      properties:
+        login:
+          type: string
+          example: probablyskela
+        email:
+          type: string
+          example: oleksandr.yovbak@gmail.com
+        passwordHash:
+          type: string
+          example: ASDaejfaslfaSFjlasf
