@@ -1,0 +1,206 @@
+openapi: 3.0.3
+info:
+  title: easy-calc API
+  version: 0.0.1
+tags:
+  - name: calculators
+    description: Calculators management
+  - name: user
+    description: User management
+paths:
+  /calculators:
+    get: # get calculators
+      tags:
+        - calculators
+      summary: Get all existing calculators
+      operationId: getCalculators
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Calculator'
+    put: # create calculator
+      tags:
+        - calculators
+      summary: Create a new calculator
+      operationId: createCalculator
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Calculator'
+        required: true
+      responses:
+        '201':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Calculator'
+        '400':
+          description: Not OK
+  /calculators/{calculatorId}:
+    parameters:
+      - name: calculatorId
+        in: path
+        description: The ID of the calculator
+        required: true
+        schema:
+          type: integer
+          format: int32
+    get: # get calculator
+      tags:
+        - calculators
+      summary: Get an existing calculator
+      operationId: getCalculator
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Calculator'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: User not found
+    post: # update calculator
+      tags:
+        - calculators
+      summary: Update an existing calculator
+      operationId: updateCalculator
+      requestBody:
+        description: Update an existing calculator
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Calculator'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: User not found
+    delete: # detele calculator
+      tags:
+        - calculators
+      summary: Delete an existing calculator
+      operationId: deleteCalculator
+      responses:
+        '204':
+          description: OK
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: User not found
+  /user:
+    put: # create user
+      tags:
+        - user
+      summary: Create a new user
+      operationId: createUser
+      requestBody:
+        description: Create user object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '201':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+  /user/{userId}:
+    parameters:
+      - name: userId
+        in: path
+        description: The ID of the user
+        required: true
+        schema:
+          type: integer
+          format: int32
+    get: # get user
+      tags:
+        - user
+      summary: Get user by user id
+      operationId: getUserByID
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: User not found
+    post: # update user
+      tags:
+        - user
+      summary: Update user
+      operationId: updateUser
+      requestBody:
+        description: Update an existing user
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '200':
+          description: OK
+    delete: # delete user
+      tags:
+        - user
+      summary: Delete user
+      operationId: deleteUser
+      responses:
+        '204':
+          description: OK
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: User not found
+components:
+  schemas:
+    Calculator:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+          example: 123456789
+        name:
+          type: string
+          example: Area of rectangle
+        author:
+          $ref: '#/components/schemas/User'
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+          example: 123456789
+        login:
+          type: string
+          example: probablyskela
+        role:
+          type: string
+          example: user
+          enum:
+            - user
+            - moderator
+            - administrator
+        calculators:
+          type: array
+          items:
+            $ref: '#/components/schemas/Calculator'
+          
