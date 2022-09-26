@@ -4,19 +4,19 @@ Web platform for publishing custom calculators.
 To install project: 
 In terminal:  
 ~~~bash  
-git clone https://github.com/probablyskela/easy-calc.git  
+git clone https://github.com/probablyskela/easy-calc.git
 ~~~  
 ~~~bash  
-cd easy-calc  
+cd easy-calc
 ~~~
 ~~~bash  
-pipenv install  
+pipenv install
 ~~~  
 ~~~bash  
-pipenv shell  
+pipenv shell
 ~~~  
 ~~~bash  
-gunicorn -w 2 hello:app  
+gunicorn -w 2 hello:app
 ~~~  
 In web-browser:  
 go to http://127.0.0.1:8000/api/v1/hello-world-4  
