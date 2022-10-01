@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: easy-calc API
-  version: 0.0.1
+  version: 1.0.0
 tags:
   - name: calculators
     description: Calculators management
@@ -23,16 +23,38 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Calculator'
-    put: # create calculator
+    post: # create calculator
       tags:
         - calculators
       summary: Create a new calculator
       operationId: createCalculator
+      security:
+        - bearerAuth: []
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Calculator'
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: Area of rectangle
+                description:
+                  type: string
+                  example: Calculates the area of a rectangle.
+                inputData:
+                  type: string
+                  example: matrix -size=(1,4) -type=integer
+                code:
+                  type: string
+                  example: https://pastebin.com/jNH8BiAb
+                codePrivacy:
+                  type: boolean
+                  example: true
+                authorId:
+                  type: integer
+                  format: int32
+                  example: 123456789
         required: true
       responses:
         '201':
@@ -42,7 +64,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Calculator'
         '400':
-          description: Not OK
+          description: Bad request
+        '401':
+          description: Unauthorized
   /calculators/{calculatorId}:
     parameters:
       - name: calculatorId
@@ -52,6 +76,7 @@ paths:
         schema:
           type: integer
           format: int32
+          example: 123456789
     get: # get calculator
       tags:
         - calculators
@@ -64,17 +89,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Calculator'
-        '400':
-          description: Invalid ID supplied
         '404':
-          description: User not found
-    post: # update calculator
+          description: Calculator not found
+    put: # update calculator
       tags:
         - calculators
       summary: Update an existing calculator
       operationId: updateCalculator
+      security:
+        - bearerAuth: []
       requestBody:
-        description: Update an existing calculator
         content:
           application/json:
             schema:
@@ -82,34 +106,132 @@ paths:
       responses:
         '200':
           description: OK
-        '400':
-          description: Invalid ID supplied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Calculator'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
         '404':
-          description: User not found
-    delete: # detele calculator
+          description: Calculator not found
+    delete: # delete calculator
       tags:
         - calculators
       summary: Delete an existing calculator
       operationId: deleteCalculator
+      security:
+        - bearerAuth: []
       responses:
         '204':
           description: OK
-        '400':
-          description: Invalid ID supplied
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
         '404':
-          description: User not found
+          description: Calculator not found
+  /calculators/{calculatorId}/reviews:
+    parameters:
+      - name: calculatorId
+        in: path
+        description: The ID of the calculator
+        required: true
+        schema:
+          type: integer
+          format: int32
+          example: 123456789
+    get: # get all reviews
+      tags:
+        - calculators
+      summary: Returns all reviews of the calculator
+      operationId: getReviews
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Review'
+        '404':
+          description: Calculator not found
+    post: # add calculator review
+      tags:
+        - calculators
+      summary: Add a review to calculator
+      operationId: reviewCalculator
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Very nice calculator!
+                rating:
+                  type: integer
+                  minimum: 0
+                  maximum: 5
+                authorId:
+                  type: integer
+                  format: int32
+                  example: 123456789
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Review'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Calculator not found
+    delete: # delete calculator review
+      tags:
+        - calculators
+      summary: Deletes a review to calculator
+      operationId: deleteReview
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: OK
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Review not found
   /user:
-    put: # create user
+    post: # create user
       tags:
         - user
       summary: Create a new user
       operationId: createUser
       requestBody:
-        description: Create user object
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/User'
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: oleksandr.yovbak@gmail.com
+                username:
+                  type: string
+                  example: probablyskela
+                passwordHash:
+                  type: string
+                  example: ASDaejfaslfaSFjlasf
+        required: true
       responses:
         '201':
           description: OK
@@ -117,6 +239,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
+        '400':
+          description: Invalid email/username
   /user/{userId}:
     parameters:
       - name: userId
@@ -138,15 +262,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
-        '400':
-          description: Invalid ID supplied
         '404':
           description: User not found
-    post: # update user
+    put: # update user
       tags:
         - user
       summary: Update user
       operationId: updateUser
+      security:
+        - bearerAuth: []
       requestBody:
         description: Update an existing user
         content:
@@ -154,20 +278,83 @@ paths:
             schema:
               $ref: '#/components/schemas/User'
       responses:
-        '200':
+        '201':
           description: OK
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: User not found
     delete: # delete user
       tags:
         - user
       summary: Delete user
       operationId: deleteUser
+      security: 
+        - bearerAuth: []
       responses:
         '204':
           description: OK
         '400':
           description: Invalid ID supplied
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
         '404':
           description: User not found
+  /user/login:
+    post: # login
+      tags:
+        - user
+      summary: Starts new user session
+      operationId: userLogin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  example: probablyskela
+                passwordHash:
+                  type: string
+                  example: aSDJaksldasdASd
+      responses:
+        '200':
+          description: OK
+          headers:
+            X-Rate-Limit:
+              description: calls per hour allowed by the user
+              schema:
+                type: integer
+                format: int32
+            X-Expires-After:
+              description: date in UTC when token expires
+              schema:
+                type: string
+                format: date-time
+          content:
+            application/json:
+              schema:
+                type: string
+        '400':
+          description: Invalid username or password
+  /user/logout:
+    get: # logout
+      tags:
+        - user
+      summary: Ends current user session
+      operationId: userLogout
+      security:
+        - bearerAuth: []
+      responses: 
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
 components:
   schemas:
     Calculator:
@@ -180,8 +367,23 @@ components:
         name:
           type: string
           example: Area of rectangle
-        author:
-          $ref: '#/components/schemas/User'
+        description:
+          type: string
+          example: Calculates the area of a rectangle.
+        inputData:
+          type: string
+          example: matrix -size=(1,4) -type=integer
+        code:
+          type: string
+          format: uri
+          example: https://pastebin.com/jNH8BiAb
+        codePrivacy:
+          type: boolean 
+          example: true
+        authorId:
+          type: integer
+          format: int32
+          example: 123456789
     User:
       type: object
       properties:
@@ -189,18 +391,50 @@ components:
           type: integer
           format: int32
           example: 123456789
-        login:
+        email:
+          type: string
+          format: email
+          example: oleksandr.yovbak@gmail.com
+        username:
           type: string
           example: probablyskela
         role:
           type: string
-          example: user
+          example: User
           enum:
-            - user
-            - moderator
-            - administrator
+            - User
+            - Moderator
+            - Administrator
         calculators:
           type: array
           items:
-            $ref: '#/components/schemas/Calculator'
-          
+            type: integer
+            format: int32
+            example: 123456789
+          uniqueItems: true
+    Review:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+          example: 123456789
+        message:
+          type: string
+          example: Very nice calculator!
+        rating:
+          type: integer
+          minimum: 0
+          maximum: 5
+        calculatorId:
+          type: integer
+          format: int32
+          example: 123456789
+        authorId:
+          type: integer
+          format: int32
+          example: 123456789
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearerAuth
