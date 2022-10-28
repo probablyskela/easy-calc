@@ -14,7 +14,8 @@ pipenv install
 ~~~  
 ~~~bash  
 pipenv shell
-~~~  
+~~~ 
+Change your database string in env.py
 ~~~bash  
 gunicorn -w 2 hello:app
 ~~~  
