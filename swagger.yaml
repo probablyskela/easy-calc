@@ -48,7 +48,7 @@ paths:
                 code:
                   type: string
                   example: https://pastebin.com/jNH8BiAb
-                codePrivacy:
+                isPublic:
                   type: boolean
                   example: true
                 authorId:
@@ -271,7 +271,7 @@ paths:
         '404':
           description: Calculator not found
   /user:
-    post: # create user
+    put: # create user
       tags:
         - user
       summary: Create a new user
@@ -325,7 +325,7 @@ paths:
                 $ref: '#/components/schemas/User'
         '404':
           description: User not found
-    put: # update user
+    patch: # update user
       tags:
         - user
       summary: Update user
@@ -342,6 +342,15 @@ paths:
                   type: string
                 username:
                   type: string
+                password:
+                  type: string
+                role:
+                  type: string
+                  example: User
+                  enum:
+                    - User
+                    - Moderator
+                    - Administrator
       responses:
         '201':
           description: OK
@@ -358,7 +367,7 @@ paths:
         - user
       summary: Delete user
       operationId: deleteUser
-      security: 
+      security:
         - bearerAuth: []
       responses:
         '204':
@@ -417,7 +426,7 @@ paths:
       operationId: userLogout
       security:
         - bearerAuth: []
-      responses: 
+      responses:
         '200':
           description: OK
         '401':
@@ -445,7 +454,7 @@ components:
           format: uri
           example: https://pastebin.com/jNH8BiAb
         codePrivacy:
-          type: boolean 
+          type: boolean
           example: true
         author:
           $ref: '#/components/schemas/User'
