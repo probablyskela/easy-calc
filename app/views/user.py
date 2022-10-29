@@ -6,7 +6,7 @@ import app.models as models
 import app.db as db
 from flask_bcrypt import Bcrypt
 
-blpr = Blueprint('user', __name__, url_prefix='/user')
+user_blueprint = Blueprint('user', __name__, url_prefix='/user')
 bcrypt = Bcrypt()
 
 class UserRole(Enum):
@@ -23,7 +23,7 @@ def from_user_model_to_json(user: models.User):
 		
 	return jsonify(user_json)
 
-@blpr.route('/', methods=['POST'])
+@user_blueprint.route('/', methods=['POST'])
 def create_user():
 	class User(Schema):
 		email = fields.Email(required=True)
@@ -53,7 +53,7 @@ def create_user():
 
 	return from_user_model_to_json(new_user_model), 201
 
-@blpr.route('/<int:user_id>', methods=['GET'])
+@user_blueprint.route('/<int:user_id>', methods=['GET'])
 def get_user(user_id):
 	user = db.session.query(models.User).filter_by(id=user_id).first()
 	if user is None:
@@ -61,7 +61,7 @@ def get_user(user_id):
 
 	return from_user_model_to_json(user), 200
 
-@blpr.route('/<int:user_id>', methods=['PATCH'])
+@user_blueprint.route('/<int:user_id>', methods=['PATCH'])
 def update_user(user_id):	
 	try:
 		class User(Schema):
@@ -72,7 +72,7 @@ def update_user(user_id):
 
 		if not request.json:
 			raise ValidationError('No input data provided')
-		User().load(request.json)
+		User().validate(request.json)
 	except ValidationError as err:
 		return jsonify(err.messages), 400
 
@@ -97,7 +97,7 @@ def update_user(user_id):
 
 	return "", 204
 
-@blpr.route('/<int:user_id>', methods=['DELETE'])
+@user_blueprint.route('/<int:user_id>', methods=['DELETE'])
 def delete_user(user_id):
 	user = db.session.query(models.User).filter(models.User.id == user_id).first()
 	if user is None:

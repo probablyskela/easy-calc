@@ -19,9 +19,9 @@ class Calculator(Base):
 	name = Column(String(40), nullable = False)
 	description = Column(String(256), nullable = True)
 	input_data = Column(String(256), nullable = False) 
-	code = Column(String(256), nullable = False, unique=True)
-	isPublic = Column(Boolean, nullable = False)
-	owner_id = Column(Integer, ForeignKey('users.id'), nullable = False)
+	code = Column(BLOB, nullable = False, unique = false)
+	is_public = Column(Boolean, nullable = False)
+	author_id = Column(Integer, ForeignKey('users.id'), nullable = False)
 
 class Review(Base):
 	__tablename__ = "reviews"
