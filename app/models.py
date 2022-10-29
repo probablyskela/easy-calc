@@ -10,7 +10,7 @@ class User(Base):
 	email = Column(String(75), nullable = False)
 	username = Column(String(30), nullable = False, unique=True)
 	role = Column(String(14), nullable = False)
-	password = Column(String(100), nullable = False, server_default="Legacy")
+	password = Column(String(100), nullable = False)
 	
 class Calculator(Base):
 	__tablename__ = "calculators"
@@ -19,7 +19,7 @@ class Calculator(Base):
 	name = Column(String(40), nullable = False)
 	description = Column(String(256), nullable = True)
 	input_data = Column(String(256), nullable = False) 
-	code = Column(BLOB, nullable = False, unique = false)
+	code = Column(String(256), nullable = False)
 	is_public = Column(Boolean, nullable = False)
 	author_id = Column(Integer, ForeignKey('users.id'), nullable = False)
 

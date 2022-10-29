@@ -50,7 +50,6 @@ paths:
                   example: matrix -size=(1,4) -type=integer
                 code:
                   type: string
-                  example: https://pastebin.com/jNH8BiAb
                 isPublic:
                   type: boolean
                   example: true
@@ -115,8 +114,9 @@ paths:
                   type: string
                 code:
                   type: string
-                codePrivacy:
-                  type: string
+                isPublic:
+                  type: boolean
+                  example: true
       responses:
         '200':
           description: OK
@@ -458,7 +458,7 @@ components:
           type: string
           format: uri
           example: https://pastebin.com/jNH8BiAb
-        codePrivacy:
+        is_public:
           type: boolean
           example: true
         author:
@@ -484,10 +484,12 @@ components:
             - User
             - Moderator
             - Administrator
-        calculators:
+        calculatorsIds:
           type: array
           items:
-            $ref: '#/components/schemas/Calculator'
+            type: integer
+            format: int32
+            example: 123456789
     Review:
       type: object
       properties:
@@ -502,10 +504,11 @@ components:
           type: integer
           minimum: 0
           maximum: 5
-        calculatorId:
-          $ref: '#/components/schemas/Calculator'
-        author:
-          $ref: '#/components/schemas/User'
+        authorId:
+          type: integer
+          format: int32
+          example: 123456789
+
   securitySchemes:
     bearerAuth:
       type: http

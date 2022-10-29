@@ -123,6 +123,7 @@ def update_calculator(calculator_id):
 		return jsonify({'error': 'Database error'}), 500
 
 	db.session.commit()
+
 	return get_calculator(calculator_id)
 
 @calculator_blpr.route('/<int:calculator_id>', methods=['DELETE'])

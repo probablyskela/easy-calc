@@ -14,15 +14,6 @@ class UserRole(Enum):
 	moderator = 2
 	administrator = 3
 
-def from_user_model_to_json(user: models.User):
-	user_json = {}
-	user_json['id'] = user.id
-	user_json['email'] = user.email
-	user_json['username'] = user.username
-	user_json['role'] = user.role
-		
-	return jsonify(user_json)
-
 @user_blueprint.route('/', methods=['POST'])
 def create_user():
 	class User(Schema):
@@ -34,7 +25,7 @@ def create_user():
 	try:
 		if not request.json:
 			raise ValidationError('No input data provided')
-		User().load(request.json)
+		User().validate(request.json)
 	except ValidationError as err:
 		return jsonify(err.messages), 400
 
@@ -51,15 +42,22 @@ def create_user():
 
 	db.session.commit()
 
-	return from_user_model_to_json(new_user_model), 201
+	return get_user(new_user_model.id)
 
 @user_blueprint.route('/<int:user_id>', methods=['GET'])
 def get_user(user_id):
 	user = db.session.query(models.User).filter_by(id=user_id).first()
 	if user is None:
 		return jsonify({'error': 'User not found'}), 404
+	
+	res_json = {}
+	res_json['id'] = user.id
+	res_json['email'] = user.email
+	res_json['username'] = user.username
+	res_json['role'] = user.role
+	res_json['calculatorIds'] = [int(row.id) for row in db.session.query(models.Calculator).filter_by(author_id=user_id).all()]
 
-	return from_user_model_to_json(user), 200
+	return jsonify(res_json), 200
 
 @user_blueprint.route('/<int:user_id>', methods=['PATCH'])
 def update_user(user_id):	
@@ -112,5 +110,4 @@ def delete_user(user_id):
 	db.session.commit()
 
 	return "", 204
-
 
