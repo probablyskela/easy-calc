@@ -36,13 +36,22 @@ def add_review_to_calculator(review_calculator_id):
 		message = fields.Str(required=True)
 		rating = fields.Int(required=True)
 		authorId = fields.Int(required=True)
-	
+
 	try:
 		if not request.json:
 			raise ValidationError('No input data provided')
 		Review().validate(request.json)
 	except ValidationError as err:
 		return jsonify(err.messages), 400
+
+	old_review = db.session.query(
+		models.Review 
+	).filter(
+		models.Review.calculator_id == review_calculator_id, models.Review.author_id == request.json['authorId']
+	).first()
+	
+	if old_review is not None:
+		return jsonify({'error': 'Review already exists'}), 400
 
 	review = models.Review(message = request.json['message'], rating = request.json['rating'], author_id = request.json['authorId'], calculator_id=review_calculator_id)
 

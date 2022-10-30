@@ -276,7 +276,7 @@ paths:
           '404':
             description: Review not found
   /user:
-    put: # create user
+    post: # create user
       tags:
         - user
       summary: Create a new user
@@ -294,9 +294,16 @@ paths:
                 username:
                   type: string
                   example: probablyskela
-                passwordHash:
+                password:
                   type: string
                   example: ASDaejfaslfaSFjlasf
+                role:
+                  type: string
+                  example: user
+                  enum:
+                    - user
+                    - moderator
+                    - administrator
         required: true
       responses:
         '201':
@@ -351,11 +358,11 @@ paths:
                   type: string
                 role:
                   type: string
-                  example: User
+                  example: user
                   enum:
-                    - User
-                    - Moderator
-                    - Administrator
+                    - user
+                    - moderator
+                    - administrator
       responses:
         '201':
           description: OK
@@ -377,8 +384,6 @@ paths:
       responses:
         '204':
           description: OK
-        '400':
-          description: Invalid ID supplied
         '401':
           description: Unauthorized
         '403':
@@ -479,11 +484,11 @@ components:
           example: probablyskela
         role:
           type: string
-          example: User
+          example: user
           enum:
-            - User
-            - Moderator
-            - Administrator
+            - user
+            - moderator
+            - administrator
         calculatorsIds:
           type: array
           items:
