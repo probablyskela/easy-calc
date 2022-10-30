@@ -93,7 +93,7 @@ def update_user(user_id):
 
 	db.session.commit()
 
-	return "", 204
+	return get_user(user_id)
 
 @user_blueprint.route('/<int:user_id>', methods=['DELETE'])
 def delete_user(user_id):
