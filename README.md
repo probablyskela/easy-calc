@@ -14,7 +14,11 @@ pipenv install
 ~~~  
 ~~~bash  
 pipenv shell
-~~~  
+~~~ 
+Change your database string in env.py. Default is:
+~~~
+postgresql://admin:admin@localhost/pp
+~~~
 ~~~bash  
 gunicorn -w 2 hello:app
 ~~~  

@@ -3,15 +3,17 @@ info:
   title: easy-calc API
   version: 1.0.0
 tags:
-  - name: calculators
-    description: Calculators management
+  - name: calculator
+    description: Calculator management
+  - name: review
+    description: Review management
   - name: user
     description: User management
 paths:
   /calculators:
     get: # get calculators
       tags:
-        - calculators
+        - calculator
       summary: Get all existing calculators
       operationId: getCalculators
       responses:
@@ -23,9 +25,10 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Calculator'
+  /calculator:
     post: # create calculator
       tags:
-        - calculators
+        - calculator
       summary: Create a new calculator
       operationId: createCalculator
       security:
@@ -47,8 +50,7 @@ paths:
                   example: matrix -size=(1,4) -type=integer
                 code:
                   type: string
-                  example: https://pastebin.com/jNH8BiAb
-                codePrivacy:
+                isPublic:
                   type: boolean
                   example: true
                 authorId:
@@ -67,7 +69,7 @@ paths:
           description: Bad request
         '401':
           description: Unauthorized
-  /calculators/{calculatorId}:
+  /calculator/{calculatorId}:
     parameters:
       - name: calculatorId
         in: path
@@ -79,7 +81,7 @@ paths:
           example: 123456789
     get: # get calculator
       tags:
-        - calculators
+        - calculator
       summary: Get an existing calculator
       operationId: getCalculator
       responses:
@@ -91,9 +93,9 @@ paths:
                 $ref: '#/components/schemas/Calculator'
         '404':
           description: Calculator not found
-    put: # update calculator
+    patch: # update calculator
       tags:
-        - calculators
+        - calculator
       summary: Update an existing calculator
       operationId: updateCalculator
       security:
@@ -112,8 +114,9 @@ paths:
                   type: string
                 code:
                   type: string
-                codePrivacy:
-                  type: string
+                isPublic:
+                  type: boolean
+                  example: true
       responses:
         '200':
           description: OK
@@ -129,7 +132,7 @@ paths:
           description: Calculator not found
     delete: # delete calculator
       tags:
-        - calculators
+        - calculator
       summary: Delete an existing calculator
       operationId: deleteCalculator
       security:
@@ -143,7 +146,7 @@ paths:
           description: Forbidden
         '404':
           description: Calculator not found
-  /calculators/{calculatorId}/reviews:
+  /calculator/{calculatorId}/reviews:
     parameters:
       - name: calculatorId
         in: path
@@ -155,7 +158,7 @@ paths:
           example: 123456789
     get: # get all reviews
       tags:
-        - calculators
+        - review
       summary: Returns all reviews of the calculator
       operationId: getReviews
       responses:
@@ -169,9 +172,19 @@ paths:
                   $ref: '#/components/schemas/Review'
         '404':
           description: Calculator not found
-    post: # add calculator review
+  /calculator/{calculatorId}/review:
+    parameters:
+      - name: calculatorId
+        in: path
+        description: The ID of the calculator
+        required: true
+        schema:
+          type: integer
+          format: int32
+          example: 123456789
+    post:
       tags:
-        - calculators
+        - review
       summary: Add a review to calculator
       operationId: reviewCalculator
       security:
@@ -204,32 +217,8 @@ paths:
           description: Unauthorized
         '404':
           description: Calculator not found
-    delete: # delete calculator review
-      tags:
-        - calculators
-      summary: Deletes a review to calculator
-      operationId: deleteReview
-      security:
-        - bearerAuth: []
-      responses:
-        '204':
-          description: OK
-        '401':
-          description: Unauthorized
-        '403':
-          description: Forbidden
-        '404':
-          description: Review not found
-  /calculators/{calculatorId}/reviews/{reviewId}:
+  /review/{reviewId}:
     parameters:
-      - name: calculatorId
-        in: path
-        description: The ID of the calculator
-        required: true
-        schema:
-          type: integer
-          format: int32
-          example: 123456789
       - name: reviewId
         in: path
         description: Review id
@@ -237,10 +226,10 @@ paths:
         schema:
           type: integer
           example: 345634756
-    put: # add calculator review
+    patch:
       tags:
-        - calculators
-      summary: Edit review
+        - review
+      summary: Edit a review
       operationId: editReview
       security:
         - bearerAuth: []
@@ -269,9 +258,25 @@ paths:
         '403':
           description: Forbidden
         '404':
-          description: Calculator not found
+          description: Calculator or review not found
+    delete:
+        tags:
+          - review
+        summary: Delete a review
+        operationId: deleteReview
+        security:
+          - bearerAuth: []
+        responses:
+          '204':
+            description: OK
+          '401':
+            description: Unauthorized
+          '403':
+            description: Forbidden
+          '404':
+            description: Review not found
   /user:
-    post: # create user
+    put: # create user
       tags:
         - user
       summary: Create a new user
@@ -325,7 +330,7 @@ paths:
                 $ref: '#/components/schemas/User'
         '404':
           description: User not found
-    put: # update user
+    patch: # update user
       tags:
         - user
       summary: Update user
@@ -342,6 +347,15 @@ paths:
                   type: string
                 username:
                   type: string
+                password:
+                  type: string
+                role:
+                  type: string
+                  example: User
+                  enum:
+                    - User
+                    - Moderator
+                    - Administrator
       responses:
         '201':
           description: OK
@@ -358,7 +372,7 @@ paths:
         - user
       summary: Delete user
       operationId: deleteUser
-      security: 
+      security:
         - bearerAuth: []
       responses:
         '204':
@@ -417,7 +431,7 @@ paths:
       operationId: userLogout
       security:
         - bearerAuth: []
-      responses: 
+      responses:
         '200':
           description: OK
         '401':
@@ -444,8 +458,8 @@ components:
           type: string
           format: uri
           example: https://pastebin.com/jNH8BiAb
-        codePrivacy:
-          type: boolean 
+        is_public:
+          type: boolean
           example: true
         author:
           $ref: '#/components/schemas/User'
@@ -470,10 +484,12 @@ components:
             - User
             - Moderator
             - Administrator
-        calculators:
+        calculatorsIds:
           type: array
           items:
-            $ref: '#/components/schemas/Calculator'
+            type: integer
+            format: int32
+            example: 123456789
     Review:
       type: object
       properties:
@@ -488,10 +504,11 @@ components:
           type: integer
           minimum: 0
           maximum: 5
-        calculatorId:
-          $ref: '#/components/schemas/Calculator'
-        author:
-          $ref: '#/components/schemas/User'
+        authorId:
+          type: integer
+          format: int32
+          example: 123456789
+
   securitySchemes:
     bearerAuth:
       type: http
