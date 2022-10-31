@@ -1,5 +1,5 @@
 from sqlalchemy import *
-from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm import declarative_base, relationship
 
 Base = declarative_base()
 
@@ -12,6 +12,9 @@ class User(Base):
 	role = Column(String(14), nullable = False)
 	password = Column(String(100), nullable = False)
 	
+	review_child = relationship("Review", cascade="all,delete", backref="review_parent_user")
+	calculator_child = relationship("Calculator", cascade="all,delete", backref="calculator_parent_user")
+
 class Calculator(Base):
 	__tablename__ = "calculators"
 
@@ -21,7 +24,9 @@ class Calculator(Base):
 	input_data = Column(String(256), nullable = False) 
 	code = Column(String(256), nullable = False)
 	is_public = Column(Boolean, nullable = False)
-	author_id = Column(Integer, ForeignKey('users.id'), nullable = False)
+	author_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable = False)
+
+	review_child = relationship("Review", cascade="all,delete", backref="review_parent_calculator")
 
 class Review(Base):
 	__tablename__ = "reviews"
@@ -31,4 +36,4 @@ class Review(Base):
 	rating = Column(Integer, nullable = False)
 	author_id = Column(Integer, ForeignKey('users.id'), nullable = False)
 	calculator_id = Column(Integer, ForeignKey('calculators.id'), nullable = False)
-	 
+
