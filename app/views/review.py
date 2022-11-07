@@ -1,10 +1,7 @@
 from marshmallow import Schema, fields, ValidationError
-from marshmallow_enum import EnumField
-from enum import Enum
 from flask import Blueprint, jsonify, request
 import app.models as models
 import app.db as db
-from flask_bcrypt import Bcrypt
 
 reviews_blpr = Blueprint('review', __name__, url_prefix='/')
 
@@ -13,7 +10,7 @@ def get_all_reviws_for_calculator(calculator_id):
 	if db.session.query(models.Calculator).filter_by(id=calculator_id).first() is None:
 		return jsonify({'error': 'Calculator not found'}), 404
 
-	reviews = db.session.query(models.Review).filter_by(calculatorId=calculator_id).all()
+	reviews = db.session.query(models.Review).filter(models.Review.calculator_id==calculator_id).all()
 	res = []
 	for review in reviews:
 		current = {}
@@ -21,7 +18,7 @@ def get_all_reviws_for_calculator(calculator_id):
 		current['id'] = review.id
 		current['message'] = review.message
 		current['rating'] = review.rating
-		current['authorId'] = review.authorId
+		current['authorId'] = review.author_id
 		
 		res.append(current)
 
@@ -43,6 +40,9 @@ def add_review_to_calculator(review_calculator_id):
 		Review().validate(request.json)
 	except ValidationError as err:
 		return jsonify(err.messages), 400
+
+	if not(0 <= request.json['rating'] <= 5):
+		return jsonify({'error': 'Rating must be between 0 and 5'}), 400
 
 	old_review = db.session.query(
 		models.Review 
@@ -88,6 +88,8 @@ def update_review(review_id):
 		if 'message' in request.json:
 			review.message = request.json['message']
 		if 'rating' in request.json:
+			if not(0 <= request.json['rating'] <= 5):
+				return jsonify({'error': 'Rating must be between 0 and 5'}), 400
 			review.rating = request.json['rating']
 	except:
 		db.session.rollback()
