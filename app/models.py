@@ -9,7 +9,7 @@ class User(Base):
 	id = Column(Integer, Identity(start = 1, cycle = False), primary_key = True, nullable = False)
 	email = Column(String(75), nullable = False)
 	username = Column(String(30), nullable = False, unique=True)
-	role = Column(String(14), nullable = False)
+	role = Column(Integer, nullable = False)
 	password = Column(String(100), nullable = False)
 	
 	review_child = relationship("Review", cascade="all,delete", backref="review_parent_user")
