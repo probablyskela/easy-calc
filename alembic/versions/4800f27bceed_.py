@@ -1,8 +1,8 @@
-"""New rev
+"""empty message
 
-Revision ID: faaf03ce2abf
+Revision ID: 4800f27bceed
 Revises: 
-Create Date: 2022-10-09 12:10:58.172419
+Create Date: 2022-11-12 20:26:21.670604
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'faaf03ce2abf'
+revision = '4800f27bceed'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -22,8 +22,10 @@ def upgrade() -> None:
     sa.Column('id', sa.Integer(), sa.Identity(always=False, start=1, cycle=False), nullable=False),
     sa.Column('email', sa.String(length=75), nullable=False),
     sa.Column('username', sa.String(length=30), nullable=False),
-    sa.Column('role', sa.String(length=14), nullable=False),
-    sa.PrimaryKeyConstraint('id')
+    sa.Column('role', sa.Integer(), nullable=False),
+    sa.Column('password', sa.String(length=100), nullable=False),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('username')
     )
     op.create_table('calculators',
     sa.Column('id', sa.Integer(), sa.Identity(always=False, start=1, cycle=False), nullable=False),
@@ -31,9 +33,9 @@ def upgrade() -> None:
     sa.Column('description', sa.String(length=256), nullable=True),
     sa.Column('input_data', sa.String(length=256), nullable=False),
     sa.Column('code', sa.String(length=256), nullable=False),
-    sa.Column('codePrivacy', sa.Boolean(), nullable=False),
-    sa.Column('owner_id', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['owner_id'], ['users.id'], ),
+    sa.Column('is_public', sa.Boolean(), nullable=False),
+    sa.Column('author_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['author_id'], ['users.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('reviews',
