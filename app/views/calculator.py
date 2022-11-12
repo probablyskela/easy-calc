@@ -46,7 +46,6 @@ def create_new_calculator():
 		inputData = fields.Str(required=True)
 		code = fields.Str(required=True)
 		isPublic = fields.Bool(required=True)
-		authorId = fields.Int(required=True)
 	try:
 		if not request.json:
 			raise ValidationError('No input data provided')
@@ -60,7 +59,7 @@ def create_new_calculator():
 		input_data=calculator['inputData'],
 		code=calculator['code'],
 		is_public=calculator['isPublic'],
-		author_id=calculator['authorId'])
+		author_id=get_jwt_identity())
 	
 	res = {}
 	try:

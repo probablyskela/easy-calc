@@ -1,6 +1,6 @@
 from marshmallow import Schema, fields, ValidationError
 from marshmallow_enum import EnumField
-from enum import Enum
+from enum import Enum, IntEnum
 from flask import Blueprint, jsonify, request
 import app.models as models
 import app.db as db
@@ -15,7 +15,7 @@ jwt = JWTManager(app)
 user_blueprint = Blueprint('user', __name__, url_prefix='/user')
 bcrypt = Bcrypt()
 
-class UserRole(Enum):
+class UserRole(IntEnum):
 	User = 1 
 	Moderator = 2
 	Administrator = 3
