@@ -10,9 +10,9 @@ user_blueprint = Blueprint('user', __name__, url_prefix='/user')
 bcrypt = Bcrypt()
 
 class UserRole(Enum):
-	user = 1 
-	moderator = 2
-	administrator = 3
+	User = 1 
+	Moderator = 2
+	Administrator = 3
 
 @user_blueprint.route('/', methods=['POST'])
 def create_user():

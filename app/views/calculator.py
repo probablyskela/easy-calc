@@ -166,3 +166,65 @@ def delete_calculator(calculator_id):
 	db.session.commit()
 	return {'message': 'Calculator deleted successfully'}, 200
 
+
+@calculators_blpr.route('/<int:calculator_id>/reviews', methods=['GET'])
+def get_all_reviws_for_calculator(calculator_id):	
+	if db.session.query(models.Calculator).filter_by(id=calculator_id).first() is None:
+		return jsonify({'error': 'Calculator not found'}), 404
+
+	reviews = db.session.query(models.Review).filter(models.Review.calculator_id==calculator_id).all()
+	res = []
+	for review in reviews:
+		current = {}
+
+		current['id'] = review.id
+		current['message'] = review.message
+		current['rating'] = review.rating
+		current['authorId'] = review.author_id
+		
+		res.append(current)
+
+	return jsonify(res), 200
+
+@calculators_blpr.route('/<int:review_calculator_id>/reviews', methods=['POST'])
+def add_review_to_calculator(review_calculator_id):
+	if db.session.query(models.Calculator).filter_by(id=review_calculator_id).first() is None:
+		return jsonify({'error': 'Calculator not found'}), 404
+
+	class Review(Schema):
+		message = fields.Str(required=True)
+		rating = fields.Int(required=True)
+		authorId = fields.Int(required=True)
+
+	try:
+		if not request.json:
+			raise ValidationError('No input data provided')
+		Review().validate(request.json)
+	except ValidationError as err:
+		return jsonify(err.messages), 400
+
+	if not(0 <= request.json['rating'] <= 5):
+		return jsonify({'error': 'Rating must be between 0 and 5'}), 400
+
+	old_review = db.session.query(
+		models.Review 
+	).filter(
+		models.Review.calculator_id == review_calculator_id, models.Review.author_id == request.json['authorId']
+	).first()
+	
+	if old_review is not None:
+		return jsonify({'error': 'Review already exists'}), 400
+
+	review = models.Review(message = request.json['message'], rating = request.json['rating'], author_id = request.json['authorId'], calculator_id=review_calculator_id)
+
+	try:
+		db.session.add(review)
+	except:
+		return jsonify({'error': 'Failed to add review'}), 500
+
+	db.session.commit()
+
+	res = request.json
+	res['id'] = review.id
+
+	return jsonify(res), 200

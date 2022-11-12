@@ -6,8 +6,8 @@ import pg8000
 
 from alembic.config import Config
 
-database_str = Config('sqlalchemy.url')
-engine = create_engine("postgresql://admin:admin@localhost/pp", echo=False)
+# database_str = Config('sqlalchemy.url')
+engine = create_engine('postgresql+pg8000://postgres:123@localhost:5432/postgres', echo=False)
 
 metadata = MetaData(engine)
 Session = sessionmaker(bind=engine)
