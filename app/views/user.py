@@ -4,8 +4,14 @@ from enum import Enum
 from flask import Blueprint, jsonify, request
 import app.models as models
 import app.db as db
+from app import app
 from flask_bcrypt import Bcrypt
+from flask_jwt_extended import (
+    JWTManager, jwt_required, create_access_token,
+    get_jwt_identity
+)
 
+jwt = JWTManager(app)
 user_blueprint = Blueprint('user', __name__, url_prefix='/user')
 bcrypt = Bcrypt()
 
@@ -25,11 +31,11 @@ def create_user():
 	try:
 		if not request.json:
 			raise ValidationError('No input data provided')
-		User().validate(request.json)
+		user = User().load(request.json)
 	except ValidationError as err:
 		return jsonify(err.messages), 400
 
-	new_user_model = models.User(email = request.json['email'], username = request.json['username'], password = bcrypt.generate_password_hash(request.json['password']).decode('utf-8'), role = request.json['role'])
+	new_user_model = models.User(email = user['email'], username = user['username'], password = bcrypt.generate_password_hash(user['password']).decode('utf-8'), role = user['role'])
 	user_already_exists = db.session.query(models.User).filter(models.User.username == new_user_model.username or models.User.email == new_user_model.email).count() != 0
 	if user_already_exists:
 		return jsonify({'error': 'User already exists'}), 400
@@ -43,6 +49,37 @@ def create_user():
 	db.session.commit()
 
 	return get_user(new_user_model.id)
+
+
+@user_blueprint.route('/login', methods=['POST'])
+def login():
+	class Login(Schema):
+		username = fields.Str(required=True)
+		password = fields.Str(required=True)
+
+	try:
+		if not request.json:
+			raise ValidationError('No input data provided')
+		login = Login().load(request.json)
+	except ValidationError as err:
+		return jsonify(err.messages), 400
+
+	user = db.session.query(models.User).filter(models.User.username == login['username']).first()
+	if not user:
+		return jsonify({'error': 'User does not exist'}), 400
+
+	if not bcrypt.check_password_hash(user.password, login['password']):
+		return jsonify({'error': 'Wrong password'}), 400
+
+	access_token = create_access_token(identity=user.id)
+	return jsonify({"token": access_token}), 200
+
+
+@user_blueprint.route('/logout', methods=['GET'])
+@jwt_required()
+def logout():
+	return jsonify({"message": "Successfully logged out"}), 200
+
 
 @user_blueprint.route('/<int:user_id>', methods=['GET'])
 def get_user(user_id):
@@ -60,6 +97,7 @@ def get_user(user_id):
 	return jsonify(res_json), 200
 
 @user_blueprint.route('/<int:user_id>', methods=['PATCH'])
+@jwt_required()
 def update_user(user_id):	
 	try:
 		class User(Schema):
@@ -70,7 +108,7 @@ def update_user(user_id):
 
 		if not request.json:
 			raise ValidationError('No input data provided')
-		User().validate(request.json)
+		user = User().load(request.json)
 	except ValidationError as err:
 		return jsonify(err.messages), 400
 
@@ -78,15 +116,18 @@ def update_user(user_id):
 	if user is None:
 		return jsonify({'error': 'User does not exist'}), 404
 	
+	if user.id != get_jwt_identity() and user.role != UserRole.Administrator:
+		return jsonify({'error': 'Access denied'}), 403
+	
 	try:
-		if 'email' in request.json:
-			user.email = request.json['email']
-		if 'username' in request.json:
-			user.username = request.json['username']
-		if 'password' in request.json:
-			user.password = bcrypt.generate_password_hash(request.json['password']).decode('utf-8')
-		if 'role' in request.json:
-			user.role = request.json['role']
+		if 'email' in user:
+			user.email = user['email']
+		if 'username' in user:
+			user.username = user['username']
+		if 'password' in user:
+			user.password = bcrypt.generate_password_hash(user['password']).decode('utf-8')
+		if 'role' in user:
+			user.role = user['role']
 	except:
 		db.session.rollback()
 		return jsonify({"User data is not valid"}), 400
@@ -96,10 +137,14 @@ def update_user(user_id):
 	return get_user(user_id)
 
 @user_blueprint.route('/<int:user_id>', methods=['DELETE'])
+@jwt_required()
 def delete_user(user_id):
 	user = db.session.query(models.User).filter(models.User.id == user_id).first()
 	if user is None:
 		return jsonify({'error': 'User does not exist'}), 404
+
+	if user.id != get_jwt_identity() and user.role != UserRole.Administrator:
+		return jsonify({'error': 'Access denied'}), 403
 	
 	try:
 		db.session.delete(user)	
@@ -110,4 +155,3 @@ def delete_user(user_id):
 	db.session.commit()
 
 	return "", 204
-
