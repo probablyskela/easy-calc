@@ -112,22 +112,22 @@ def update_user(user_id):
 	except ValidationError as err:
 		return jsonify(err.messages), 400
 
-	user = db.session.query(models.User).filter(models.User.id == user_id).first()
-	if user is None:
+	new_user = db.session.query(models.User).filter(models.User.id == user_id).first()
+	if new_user is None:
 		return jsonify({'error': 'User does not exist'}), 404
 	
-	if user.id != get_jwt_identity() and user.role != UserRole.Administrator:
+	if new_user.id != get_jwt_identity() and new_user.role != UserRole.Administrator:
 		return jsonify({'error': 'Access denied'}), 403
 	
 	try:
 		if 'email' in user:
-			user.email = user['email']
+			new_user.email = user['email']
 		if 'username' in user:
-			user.username = user['username']
+			new_user.username = user['username']
 		if 'password' in user:
-			user.password = bcrypt.generate_password_hash(user['password']).decode('utf-8')
+			new_user.password = bcrypt.generate_password_hash(user['password']).decode('utf-8')
 		if 'role' in user:
-			user.role = user['role']
+			new_user.role = user['role']
 	except:
 		db.session.rollback()
 		return jsonify({"User data is not valid"}), 400

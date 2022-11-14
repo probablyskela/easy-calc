@@ -213,7 +213,6 @@ def add_review_to_calculator(review_calculator_id):
 	class Review(Schema):
 		message = fields.Str(required=True)
 		rating = fields.Int(required=True)
-		authorId = fields.Int(required=True)
 
 	try:
 		if not request.json:
@@ -228,13 +227,13 @@ def add_review_to_calculator(review_calculator_id):
 	old_review = db.session.query(
 		models.Review 
 	).filter(
-		models.Review.calculator_id == review_calculator_id, models.Review.author_id == request.json['authorId']
+		models.Review.calculator_id == review_calculator_id, models.Review.author_id == get_jwt_identity()
 	).first()
 	
 	if old_review is not None:
 		return jsonify({'error': 'Review already exists'}), 400
 
-	review = models.Review(message = request.json['message'], rating = request.json['rating'], author_id = request.json['authorId'], calculator_id=review_calculator_id)
+	review = models.Review(message = request.json['message'], rating = request.json['rating'], author_id = get_jwt_identity(), calculator_id=review_calculator_id)
 
 	try:
 		db.session.add(review)
