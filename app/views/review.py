@@ -11,15 +11,15 @@ from flask_jwt_extended import (
 jwt = JWTManager(app)
 reviews_blpr = Blueprint('review', __name__, url_prefix='/review')
 
-@reviews_blpr.route('/review/<int:review_id>', methods=['PATCH'])
+@reviews_blpr.route('/<int:review_id>', methods=['PATCH'])
 @jwt_required()
 def update_review(review_id):
-	review = db.session.query(models.Review).filter_by(id=review_id).first()
-	if review is None:
+	new_review = db.session.query(models.Review).filter_by(id=review_id).first()
+	if new_review is None:
 		return jsonify({'error': 'Review not found'}), 404
 	
 	user = db.session.query(models.User).filter_by(id=get_jwt_identity()).first()
-	if review.author_id != get_jwt_identity() and user.role != UserRole.Administrator and user.role != UserRole.Moderator:
+	if new_review.author_id != get_jwt_identity() and user.role != UserRole.Administrator and user.role != UserRole.Moderator:
 		return jsonify({'error': 'Access denied'}), 403
 
 	class Review(Schema):
@@ -35,11 +35,11 @@ def update_review(review_id):
 
 	try:
 		if 'message' in review:
-			review.message = review['message']
+			new_review.message = review['message']
 		if 'rating' in review:
 			if not(0 <= review['rating'] <= 5):
 				return jsonify({'error': 'Rating must be between 0 and 5'}), 400
-			review.rating = review['rating']
+			new_review.rating = review['rating']
 	except:
 		db.session.rollback()
 		return jsonify({'error': 'Failed to update review'}), 500
@@ -47,13 +47,13 @@ def update_review(review_id):
 	db.session.commit()
 
 	res = {}
-	res['id'] = review.id
-	res['message'] = review.message
-	res['rating'] = review.rating
+	res['id'] = new_review.id
+	res['message'] = new_review.message
+	res['rating'] = new_review.rating
 
 	return jsonify(res), 200
 
-@reviews_blpr.route('/review/<int:review_id>', methods=['DELETE'])
+@reviews_blpr.route('/<int:review_id>', methods=['DELETE'])
 @jwt_required()
 def delete_review(review_id):
 	review = db.session.query(models.Review).filter_by(id=review_id).first()
