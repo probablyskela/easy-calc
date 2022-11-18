@@ -6,6 +6,7 @@ import sqlalchemy
 
 from alembic import context
 from app.models import Base
+from app import app
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -16,8 +17,8 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# config.set_main_option('sqlalchemy.url', 'postgresql+pg8000://postgres:123@localhost:5432/postgres') # change this!
-sqlalchemy.url = 'postgresql+pg8000://postgres:123@localhost:5432/postgres'
+config.set_main_option('sqlalchemy.url', app.config['DATABASE']) # change this!
+# sqlalchemy.url = 'postgresql+pg8000://postgres:123@localhost:5432/postgres'
 # add your model's MetaData object here
 # for 'autogenerate' support
 # from myapp import mymodel
