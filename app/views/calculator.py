@@ -62,11 +62,9 @@ def create_new_calculator():
 		author_id=get_jwt_identity())
 	
 	res = {}
-	try:
-		db.session.add(calculator)
-		
-	except:
-		db.session.rollback()
+
+	db.session.add(calculator)
+
 
 	db.session.commit()
 	
@@ -95,8 +93,6 @@ def get_calculator(calculator_id):
 	).first()
 
 	res = {}
-	if res_model is None:
-		return jsonify({'error': 'Calculator not found'}), 404
 	
 	calculator_model, user_model = res_model
 
@@ -145,20 +141,18 @@ def update_calculator(calculator_id):
 		return jsonify({'error': 'Access denied'}), 403
 
 
-	try:
-		if 'name' in calculator:
-			calculator_model.name = calculator['name']
-		if 'description' in calculator:
-			calculator_model.description = calculator['description']
-		if 'inputData' in calculator:
-			calculator_model.input_data = calculator['inputData']
-		if 'code' in calculator:
-			calculator_model.code = calculator['code']
-		if 'isPublic' in calculator:
-			calculator_model.is_public = calculator['isPublic']
-	except:
-		db.session.rollback()
-		return jsonify({'error': 'Database error'}), 500
+
+	if 'name' in calculator:
+		calculator_model.name = calculator['name']
+	if 'description' in calculator:
+		calculator_model.description = calculator['description']
+	if 'inputData' in calculator:
+		calculator_model.input_data = calculator['inputData']
+	if 'code' in calculator:
+		calculator_model.code = calculator['code']
+	if 'isPublic' in calculator:
+		calculator_model.is_public = calculator['isPublic']
+
 
 	db.session.commit()
 
@@ -175,11 +169,8 @@ def delete_calculator(calculator_id):
 	if calculator_model.author_id != get_jwt_identity() and user.role != UserRole.Administrator:
 		return jsonify({'error': 'Access denied'}), 403
 
-	try:
-		db.session.delete(calculator_model)
-	except:
-		db.session.rollback()
-		return jsonify({'error': 'Database error'}), 500
+	db.session.delete(calculator_model)
+
 
 	db.session.commit()
 	return {'message': 'Calculator deleted successfully'}, 200
@@ -235,10 +226,8 @@ def add_review_to_calculator(review_calculator_id):
 
 	review = models.Review(message = request.json['message'], rating = request.json['rating'], author_id = get_jwt_identity(), calculator_id=review_calculator_id)
 
-	try:
-		db.session.add(review)
-	except:
-		return jsonify({'error': 'Failed to add review'}), 500
+	db.session.add(review)
+
 
 	db.session.commit()
 

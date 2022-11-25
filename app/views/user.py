@@ -40,11 +40,8 @@ def create_user():
 	if user_already_exists:
 		return jsonify({'error': 'User already exists'}), 400
 
-	try:
-		db.session.add(new_user_model)
-	except:
-		db.session.rollback()
-		return jsonify({"User data is not valid"}), 400
+	db.session.add(new_user_model)
+
 
 	db.session.commit()
 
@@ -119,18 +116,15 @@ def update_user(user_id):
 	if new_user.id != get_jwt_identity() and new_user.role != UserRole.Administrator:
 		return jsonify({'error': 'Access denied'}), 403
 	
-	try:
-		if 'email' in user:
-			new_user.email = user['email']
-		if 'username' in user:
-			new_user.username = user['username']
-		if 'password' in user:
-			new_user.password = bcrypt.generate_password_hash(user['password']).decode('utf-8')
-		if 'role' in user:
-			new_user.role = user['role']
-	except:
-		db.session.rollback()
-		return jsonify({"User data is not valid"}), 400
+	if 'email' in user:
+		new_user.email = user['email']
+	if 'username' in user:
+		new_user.username = user['username']
+	if 'password' in user:
+		new_user.password = bcrypt.generate_password_hash(user['password']).decode('utf-8')
+	if 'role' in user:
+		new_user.role = user['role']
+
 
 	db.session.commit()
 
@@ -146,11 +140,8 @@ def delete_user(user_id):
 	if user.id != get_jwt_identity() and user.role != UserRole.Administrator:
 		return jsonify({'error': 'Access denied'}), 403
 	
-	try:
-		db.session.delete(user)	
-	except:
-		db.session.rollback()
-		return jsonify({"User data is not valid"}), 400
+	db.session.delete(user)	
+
 	
 	db.session.commit()
 
