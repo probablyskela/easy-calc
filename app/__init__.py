@@ -1,7 +1,7 @@
 from flask import Flask
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'super-secret'
-app.config['DATABASE'] = 'postgresql+pg8000://postgres:123456@localhost:5432/postgres'
+app.config['DATABASE'] = open("config.txt", "r").read().strip()
 from app.views import user, calculator, review
 
 

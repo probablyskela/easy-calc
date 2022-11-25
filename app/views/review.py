@@ -33,16 +33,13 @@ def update_review(review_id):
 	except ValidationError as err:
 		return jsonify(err.messages), 400
 
-	try:
-		if 'message' in review:
-			new_review.message = review['message']
-		if 'rating' in review:
-			if not(0 <= review['rating'] <= 5):
-				return jsonify({'error': 'Rating must be between 0 and 5'}), 400
-			new_review.rating = review['rating']
-	except:
-		db.session.rollback()
-		return jsonify({'error': 'Failed to update review'}), 500
+	if 'message' in review:
+		new_review.message = review['message']
+	if 'rating' in review:
+		if not(0 <= review['rating'] <= 5):
+			return jsonify({'error': 'Rating must be between 0 and 5'}), 400
+		new_review.rating = review['rating']
+
 
 	db.session.commit()
 
@@ -63,12 +60,9 @@ def delete_review(review_id):
 	user = db.session.query(models.User).filter_by(id=get_jwt_identity()).first()
 	if review.author_id != get_jwt_identity() and user.role != UserRole.Administrator and user.role != UserRole.Moderator:
 		return jsonify({'error': 'Access denied'}), 403
-	
-	try:
-		db.session.delete(review)
-	except:
-		db.session.rollback()
-		return jsonify({'error': 'Failed to delete review'}), 500
+
+	db.session.delete(review)
+
 
 	db.session.commit()
 	return jsonify({'message': 'Review deleted'}), 204

@@ -4,7 +4,7 @@ from app.models import *
 from app import app
 engine = create_engine(app.config['DATABASE'], echo=False)
 
-metadata = MetaData(engine)
+metadata = Base.metadata
+
 Session = sessionmaker(bind=engine)
 session = Session()
-
