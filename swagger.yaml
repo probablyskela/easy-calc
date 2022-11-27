@@ -25,7 +25,6 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Calculator'
-  /calculator:
     post: # create calculator
       tags:
         - calculator
@@ -45,18 +44,14 @@ paths:
                 description:
                   type: string
                   example: Calculates the area of a rectangle.
-                inputData:
+                input:
                   type: string
                   example: matrix -size=(1,4) -type=integer
                 code:
                   type: string
-                isPublic:
+                is_public:
                   type: boolean
                   example: true
-                authorId:
-                  type: integer
-                  format: int32
-                  example: 123456789
         required: true
       responses:
         '201':
@@ -69,7 +64,7 @@ paths:
           description: Bad request
         '401':
           description: Unauthorized
-  /calculator/{calculatorId}:
+  /calculators/{calculatorId}:
     parameters:
       - name: calculatorId
         in: path
@@ -110,11 +105,11 @@ paths:
                   type: string
                 description:
                   type: string
-                inputData:
+                input:
                   type: string
                 code:
                   type: string
-                isPublic:
+                is_public:
                   type: boolean
                   example: true
       responses:
@@ -146,7 +141,7 @@ paths:
           description: Forbidden
         '404':
           description: Calculator not found
-  /calculator/{calculatorId}/reviews:
+  /calculators/{calculatorId}/reviews:
     parameters:
       - name: calculatorId
         in: path
@@ -158,7 +153,7 @@ paths:
           example: 123456789
     get: # get all reviews
       tags:
-        - review
+        - calculator
       summary: Returns all reviews of the calculator
       operationId: getReviews
       responses:
@@ -172,7 +167,7 @@ paths:
                   $ref: '#/components/schemas/Review'
         '404':
           description: Calculator not found
-  /calculator/{calculatorId}/review:
+  /calculators/{calculatorId}/review:
     parameters:
       - name: calculatorId
         in: path
@@ -184,7 +179,7 @@ paths:
           example: 123456789
     post:
       tags:
-        - review
+        - calculator
       summary: Add a review to calculator
       operationId: reviewCalculator
       security:
@@ -202,10 +197,6 @@ paths:
                   type: integer
                   minimum: 0
                   maximum: 5
-                authorId:
-                  type: integer
-                  format: int32
-                  example: 123456789
       responses:
         '200':
           description: OK
@@ -297,13 +288,6 @@ paths:
                 password:
                   type: string
                   example: ASDaejfaslfaSFjlasf
-                role:
-                  type: string
-                  example: user
-                  enum:
-                    - user
-                    - moderator
-                    - administrator
         required: true
       responses:
         '201':
@@ -358,14 +342,18 @@ paths:
                   type: string
                 role:
                   type: string
-                  example: user
+                  example: User
                   enum:
-                    - user
-                    - moderator
-                    - administrator
+                    - User
+                    - Moderator
+                    - Administrator
       responses:
         '201':
           description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
         '400':
           description: Bad Request
         '401':
@@ -405,7 +393,7 @@ paths:
                 username:
                   type: string
                   example: probablyskela
-                passwordHash:
+                password:
                   type: string
                   example: aSDJaksldasdASd
       responses:
@@ -456,7 +444,7 @@ components:
         description:
           type: string
           example: Calculates the area of a rectangle.
-        inputData:
+        input:
           type: string
           example: matrix -size=(1,4) -type=integer
         code:
@@ -466,8 +454,10 @@ components:
         is_public:
           type: boolean
           example: true
-        author:
-          $ref: '#/components/schemas/User'
+        author_id:
+          type: integer
+          format: int32
+          example: 123456789
     User:
       type: object
       properties:
@@ -484,17 +474,11 @@ components:
           example: probablyskela
         role:
           type: string
-          example: user
+          example: User
           enum:
-            - user
-            - moderator
-            - administrator
-        calculatorsIds:
-          type: array
-          items:
-            type: integer
-            format: int32
-            example: 123456789
+            - User
+            - Moderator
+            - Administrator
     Review:
       type: object
       properties:
@@ -509,12 +493,17 @@ components:
           type: integer
           minimum: 0
           maximum: 5
-        authorId:
+        author_id:
           type: integer
           format: int32
           example: 123456789
-
+        calculator_id:
+          type: integer
+          format: int32
+          example: 123456
+ 
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearerAuth
+ 

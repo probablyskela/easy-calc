@@ -21,7 +21,7 @@ class Calculator(Base):
 	id = Column(Integer, Identity(start = 1, cycle = False), primary_key = True, nullable = False)
 	name = Column(String(40), nullable = False)
 	description = Column(String(256), nullable = True)
-	input_data = Column(String(256), nullable = False) 
+	input = Column(String(256), nullable = False) 
 	code = Column(String(256), nullable = False)
 	is_public = Column(Boolean, nullable = False)
 	author_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable = False)

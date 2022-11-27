@@ -9,7 +9,7 @@ from flask_jwt_extended import (
 )
 
 jwt = JWTManager(app)
-reviews_blpr = Blueprint('review', __name__, url_prefix='/review')
+reviews_blpr = Blueprint('reviews', __name__, url_prefix='/reviews')
 
 @reviews_blpr.route('/<int:review_id>', methods=['PATCH'])
 @jwt_required()

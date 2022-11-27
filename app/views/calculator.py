@@ -13,7 +13,6 @@ from flask_jwt_extended import (
 
 jwt = JWTManager(app)
 
-calculator_blpr = Blueprint('calculator', __name__, url_prefix='/calculator')
 calculators_blpr = Blueprint('calculators', __name__, url_prefix='/calculators')
 bcrypt = Bcrypt()
 
@@ -28,7 +27,7 @@ def get_all_calculators():
 		calculator_json['id'] = calculator_model.id
 		calculator_json['name'] = calculator_model.name
 		calculator_json['description'] = calculator_model.description
-		calculator_json['inputData'] = calculator_model.input_data
+		calculator_json['inputData'] = calculator_model.input
 		calculator_json['code'] = calculator_model.code
 		calculator_json['isPubic'] = calculator_model.is_public
 		calculator_json['author_id'] = calculator_model.author_id
@@ -37,15 +36,15 @@ def get_all_calculators():
 	
 	return jsonify(res), 200
 
-@calculator_blpr.route('/', methods=['POST'])
+@calculators_blpr.route('/', methods=['POST'])
 @jwt_required()
 def create_new_calculator():
 	class Calculator(Schema):
 		name = fields.Str(required=True)
 		description = fields.Str(required=True)
-		inputData = fields.Str(required=True)
+		input = fields.Str(required=True)
 		code = fields.Str(required=True)
-		isPublic = fields.Bool(required=True)
+		is_public = fields.Bool(required=True)
 	try:
 		if not request.json:
 			raise ValidationError('No input data provided')
@@ -56,9 +55,9 @@ def create_new_calculator():
 	calculator = models.Calculator(
 		name=calculator['name'],
 		description=calculator['description'],
-		input_data=calculator['inputData'],
+		input=calculator['input'],
 		code=calculator['code'],
-		is_public=calculator['isPublic'],
+		is_public=calculator['is_public'],
 		author_id=get_jwt_identity())
 	
 	res = {}
@@ -71,14 +70,14 @@ def create_new_calculator():
 	res['id'] = calculator.id
 	res['name'] = calculator.name
 	res['description'] = calculator.description
-	res['inputData'] = calculator.input_data
+	res['input'] = calculator.input
 	res['code'] = calculator.code
-	res['isPublic'] = calculator.is_public
+	res['is_public'] = calculator.is_public
 	res['authorId'] = calculator.author_id
 
 	return jsonify(res), 200
 
-@calculator_blpr.route('/<int:calculator_id>', methods=['GET'])
+@calculators_blpr.route('/<int:calculator_id>', methods=['GET'])
 def get_calculator(calculator_id):
 	calculator = db.session.query(models.Calculator).filter_by(id=calculator_id).first()
 	if calculator is None:
@@ -99,22 +98,14 @@ def get_calculator(calculator_id):
 	res['id'] = calculator_model.id
 	res['name'] = calculator_model.name
 	res['description'] = calculator_model.description
-	res['inputData'] = calculator_model.input_data
+	res['input'] = calculator_model.input
 	res['code'] = calculator_model.code
-	res['isPublic'] = calculator_model.is_public
+	res['is_public'] = calculator_model.is_public
+	res['author_id'] = user_model.id
 	
-	res['author'] = {}
-	res['author']['id'] = user_model.id
-	res['author']['email'] = user_model.email
-	res['author']['username'] = user_model.username
-	res['author']['role'] = user_model.role
-
-	res['author']['calculatorIds'] = [int(row.id) for row in db.session.query(models.Calculator).filter_by(author_id=user_model.id).all()]
-	
-
 	return jsonify(res), 200
 
-@calculator_blpr.route('/<int:calculator_id>', methods=['PATCH'])
+@calculators_blpr.route('/<int:calculator_id>', methods=['PATCH'])
 @jwt_required()
 def update_calculator(calculator_id):
 
@@ -147,7 +138,7 @@ def update_calculator(calculator_id):
 	if 'description' in calculator:
 		calculator_model.description = calculator['description']
 	if 'inputData' in calculator:
-		calculator_model.input_data = calculator['inputData']
+		calculator_model.input = calculator['inputData']
 	if 'code' in calculator:
 		calculator_model.code = calculator['code']
 	if 'isPublic' in calculator:
@@ -158,7 +149,7 @@ def update_calculator(calculator_id):
 
 	return get_calculator(calculator_id)
 
-@calculator_blpr.route('/<int:calculator_id>', methods=['DELETE'])
+@calculators_blpr.route('/<int:calculator_id>', methods=['DELETE'])
 @jwt_required()
 def delete_calculator(calculator_id):
 	calculator_model = db.session.query(models.Calculator).filter_by(id=calculator_id).first()
@@ -173,7 +164,7 @@ def delete_calculator(calculator_id):
 
 
 	db.session.commit()
-	return {'message': 'Calculator deleted successfully'}, 200
+	return {'message': 'Calculator deleted successfully'}, 204
 
 
 @calculators_blpr.route('/<int:calculator_id>/reviews', methods=['GET'])

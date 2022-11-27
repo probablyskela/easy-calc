@@ -26,7 +26,6 @@ def create_user():
 		email = fields.Email(required=True)
 		username = fields.Str(required=True)
 		password = fields.Str(required=True)
-		role = EnumField(UserRole, by_value=False, required=True)
 
 	try:
 		if not request.json:
@@ -35,7 +34,7 @@ def create_user():
 	except ValidationError as err:
 		return jsonify(err.messages), 400
 
-	new_user_model = models.User(email = user['email'], username = user['username'], password = bcrypt.generate_password_hash(user['password']).decode('utf-8'), role = user['role'])
+	new_user_model = models.User(email = user['email'], username = user['username'], password = bcrypt.generate_password_hash(user['password']).decode('utf-8'), role = UserRole.User)
 	user_already_exists = db.session.query(models.User).filter(models.User.username == new_user_model.username or models.User.email == new_user_model.email).count() != 0
 	if user_already_exists:
 		return jsonify({'error': 'User already exists'}), 400
@@ -45,7 +44,7 @@ def create_user():
 
 	db.session.commit()
 
-	return get_user(new_user_model.id)
+	return get_user(new_user_model.id)[0], 201
 
 
 @user_blueprint.route('/login', methods=['POST'])
